@@ -16,6 +16,8 @@ export default function AdminDashboard() {
   const [candidateLogs, setCandidateLogs] = useState([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
 
+  const BASE_URL = import.meta.env.VITE_API_URL || 'https://secure-quiz-backend-mkfv.onrender.com/api';
+
   useEffect(() => {
     const count = Math.max(1, questionCount);
     setQuestionsList(prev => {
@@ -34,21 +36,29 @@ export default function AdminDashboard() {
   const handleLogin = (e) => {
     e.preventDefault();
     if (passphrase === 'AdminIT@2026') {
+      sessionStorage.setItem('secure_admin_session', 'verified_token_99');
       setIsAuthenticated(true);
     } else {
       alert('INVALID ANCHOR AUTHENTICATION PASSPHRASE.');
     }
   };
 
+  useEffect(() => {
+    const sessionToken = sessionStorage.getItem('secure_admin_session');
+    if (sessionToken === 'verified_token_99') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
   const fetchCandidateLogs = () => {
     setLoadingLogs(true);
-    axios.get(`http://localhost:5000/api/submissions?t=${new Date().getTime()}`)
+    axios.get(`${BASE_URL}/submissions?t=${new Date().getTime()}`)
       .then(res => {
         setCandidateLogs(res.data);
         setLoadingLogs(false);
       })
       .catch(err => {
-        console.error(err);
+        console.error("Dashboard Fetch Log Error:", err);
         setLoadingLogs(false);
       });
   };
@@ -89,14 +99,13 @@ export default function AdminDashboard() {
       questions: validatedQuestions
     };
 
-    axios.post('http://localhost:5000/api/questions/add-bulk', payload)
+    axios.post(`${BASE_URL}/questions/add-bulk`, payload)
       .then(() => {
         alert(`Round ${round} Configuration Replaced and Saved Successfully!`);
-        // Resetting management states cleanly back to dynamic baseline variables
         setQuestionCount(1);
         setQuestionsList([{ questionText: '', options: ['', '', '', ''], correctAnswer: '' }]);
       })
-      .catch(err => console.error(err));
+      .catch(err => console.error("Dashboard Bulk Submit Error:", err));
   };
 
   if (!isAuthenticated) {
@@ -168,17 +177,17 @@ export default function AdminDashboard() {
                 placeholder="Enter question definition details..." required
               />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
-              {q.options.map((option, optIdx) => (
-  <input 
-    key={optIdx} 
-    type="text" 
-    className="quiz-vertical-box"
-    placeholder={`Option Reference Token ${String.fromCharCode(65 + optIdx)}`}
-    value={option} 
-    onChange={(e) => handleOptionFieldChange(qIdx, optIdx, e.target.value)} 
-    required
-  />
-))}
+                {q.options.map((option, optIdx) => (
+                  <input 
+                    key={optIdx} 
+                    type="text" 
+                    className="quiz-vertical-box"
+                    placeholder={`Option Reference Token ${String.fromCharCode(65 + optIdx)}`}
+                    value={option} 
+                    onChange={(e) => handleOptionFieldChange(qIdx, optIdx, e.target.value)} 
+                    required
+                  />
+                ))}
               </div>
               <input 
                 type="text" className="quiz-vertical-box" style={{ marginTop: '10px' }}

@@ -6,19 +6,18 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-const fetchLeaderboardData = () => {
-  setLoading(true);
-  setError(null);
-  
-  // 🔥 DYNAMIC BINDING: Safely uses the live environment url variable instead of localhost
-  const BASE_URL = import.meta.env.VITE_API_URL || 'https://secure-quiz-backend-mkfv.onrender.com/api';
-  
-  axios.get(`${BASE_URL}/leaderboard?t=${new Date().getTime()}`, {
-    headers: {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache'
-    }
-  })
+  const fetchLeaderboardData = () => {
+    setLoading(true);
+    setError(null);
+    
+    const BASE_URL = import.meta.env.VITE_API_URL || 'https://secure-quiz-backend-mkfv.onrender.com/api';
+    
+    axios.get(`${BASE_URL}/leaderboard?t=${new Date().getTime()}`, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    })
     .then(res => {
       setStandings(res.data);
       setLoading(false);
@@ -28,7 +27,7 @@ const fetchLeaderboardData = () => {
       setError("Failed to synchronize academic standing matrices.");
       setLoading(false);
     });
-};
+  };
 
   useEffect(() => {
     fetchLeaderboardData();
@@ -79,7 +78,7 @@ const fetchLeaderboardData = () => {
             <tbody>
               {standings.map((candidate, index) => {
                 const isTopThree = index < 3;
-                const rankColors = ['#f59e0b', '#94a3b8', '#b45309']; // Gold, Silver, Bronze indices
+                const rankColors = ['#f59e0b', '#94a3b8', '#b45309'];
                 
                 return (
                   <tr 
@@ -95,14 +94,8 @@ const fetchLeaderboardData = () => {
                     <td style={{ padding: '14px', textAlign: 'center', fontWeight: 'bold' }}>
                       {isTopThree ? (
                         <span style={{ 
-                          display: 'inline-block', 
-                          width: '24px', 
-                          height: '24px', 
-                          lineHeight: '24px', 
-                          borderRadius: '50%', 
-                          background: rankColors[index], 
-                          color: '#0f172a',
-                          fontSize: '0.85rem'
+                          display: 'inline-block', width: '24px', height: '24px', lineHeight: '24px', 
+                          borderRadius: '50%', background: rankColors[index], color: '#0f172a', fontSize: '0.85rem'
                         }}>
                           {index + 1}
                         </span>
@@ -123,10 +116,7 @@ const fetchLeaderboardData = () => {
                       ⏱ {candidate.timeTakenMinutes || '0:00'}
                     </td>
                     <td style={{ padding: '14px', textAlign: 'center' }}>
-                      <span style={{ 
-                        fontSize: '0.85rem',
-                        color: candidate.violationsCount >= 3 ? '#ef4444' : '#94a3b8' 
-                      }}>
+                      <span style={{ fontSize: '0.85rem', color: candidate.violationsCount >= 3 ? '#ef4444' : '#94a3b8' }}>
                         {candidate.violationsCount} Warning{candidate.violationsCount !== 1 ? 's' : ''}
                       </span>
                     </td>
