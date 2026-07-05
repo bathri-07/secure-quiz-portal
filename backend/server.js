@@ -8,7 +8,7 @@ import { Submission } from './models/Submission.js';
 dotenv.config();
 const app = express();
 
-// Secure CORS for deployment
+// Secure CORS for deployment (Allows local testing + dynamic production url)
 const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:5173'];
 app.use(cors({
   origin: (origin, callback) => {
@@ -26,7 +26,6 @@ mongoose.connect(mongoURI)
   .catch(err => console.error('DB Connection Error:', err));
 
 // --- 🛡️ PRODUCTION ROOT LANDING VIEW ---
-// Placing this clearly right after database initialization guarantees it intercepts the root URL
 app.get('/', (req, res) => {
   res.status(200).send(`
     <div style="background: #0f172a; color: #fff; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif; margin: 0;">
@@ -36,14 +35,17 @@ app.get('/', (req, res) => {
   `);
 });
 
-// --- ADMIN API: BULK QUESTION GENERATION ---
+// --- ADMIN API: BULK QUESTION GENERATION (REPLACE ROUND CONFIG) ---
 app.post('/api/questions/add-bulk', async (req, res) => {
   try {
     const { round, roundDurationSeconds, questions } = req.body;
+    
     if (!questions || !Array.isArray(questions)) {
       return res.status(400).json({ error: "Payload must be a valid array." });
     }
+
     await Question.deleteMany({ round: Number(round) });
+
     const questionDocuments = questions.map(q => ({
       round: Number(round),
       roundDurationSeconds: Number(roundDurationSeconds),
@@ -51,19 +53,24 @@ app.post('/api/questions/add-bulk', async (req, res) => {
       options: q.options,
       correctAnswer: q.correctAnswer
     }));
+
     const insertedDocs = await Question.insertMany(questionDocuments);
-    res.status(201).json({ message: "Round updated successfully!", count: insertedDocs.length });
+    res.status(201).json({ 
+      message: "Round updated successfully! Previous round questions replaced.", 
+      count: insertedDocs.length 
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// --- LIVE CANDIDATE TESTING API ---
+// --- LIVE CANDIDATE TESTING API (WITH LIVE CACHE BUSTING) ---
 app.get('/api/questions/:round', async (req, res) => {
   try {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
+
     const questions = await Question.find({ round: parseInt(req.params.round, 10) }).lean();
     res.json(questions);
   } catch (error) {
@@ -75,6 +82,7 @@ app.get('/api/questions/:round', async (req, res) => {
 app.post('/api/submit', async (req, res) => {
   try {
     const { name, email, round, responses, violationsCount, timeTakenMinutes } = req.body;
+    
     const officialQuestions = await Question.find({ round: parseInt(round, 10) });
     const totalQuestions = officialQuestions.length || 1; 
     let correctCount = 0;
@@ -83,22 +91,33 @@ app.post('/api/submit', async (req, res) => {
       const questionItem = officialQuestions.find(item => item._id.toString() === resp.questionId);
       const isCorrect = questionItem ? questionItem.correctAnswer.trim() === resp.selectedAnswer.trim() : false;
       if (isCorrect) correctCount++;
-      return { questionId: resp.questionId, selectedAnswer: resp.selectedAnswer, isCorrect };
+      return {
+        questionId: resp.questionId,
+        selectedAnswer: resp.selectedAnswer,
+        isCorrect
+      };
     });
 
     const calculatedScore = Math.round((correctCount / totalQuestions) * 100);
+
     const newSubmission = new Submission({
-      name, email, round: parseInt(round, 10), answers, score: calculatedScore,
-      violationsCount: Number(violationsCount), timeTakenMinutes
+      name,
+      email,
+      round: parseInt(round, 10),
+      answers, 
+      score: calculatedScore,
+      violationsCount: Number(violationsCount),
+      timeTakenMinutes
     });
+
     await newSubmission.save();
-    res.status(201).json({ message: 'Saved successfully!', score: calculatedScore });
+    res.status(201).json({ message: 'Submission evaluated and saved directly to MongoDB!', score: calculatedScore });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// --- ADMINISTRATIVE MONITORING LOGS ---
+// --- ADMINISTRATIVE MONITORING LOGS (FOR CONTROL CENTER TAB) ---
 app.get('/api/submissions', async (req, res) => {
   try {
     const logs = await Submission.find().sort({ _id: -1 }).lean();
@@ -112,7 +131,9 @@ app.get('/api/submissions', async (req, res) => {
 app.get('/api/leaderboard', async (req, res) => {
   try {
     const leaderboard = await Submission.find({}, 'name score round timeTakenMinutes violationsCount submittedAt')
-      .sort({ score: -1, timeTakenMinutes: 1 }).lean(); 
+      .sort({ score: -1, timeTakenMinutes: 1 })
+      .lean(); 
+    
     res.json(leaderboard);
   } catch (error) {
     res.status(500).json({ error: error.message });
