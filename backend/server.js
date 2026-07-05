@@ -130,5 +130,11 @@ app.get('/api/leaderboard', async (req, res) => {
   }
 });
 
+
+// --- ROOT HEALTH CHECK ROUTE ---
+app.get('/', (req, res) => {
+  res.status(200).send('<h1>Secure Institutional Quiz Portal Core API Services Active</h1>');
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Production-ready server executing on port ${PORT}`));
