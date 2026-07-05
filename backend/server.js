@@ -136,5 +136,15 @@ app.get('/', (req, res) => {
   res.status(200).send('<h1>Secure Institutional Quiz Portal Core API Services Active</h1>');
 });
 
+// --- ROOT ARRIVAL PAGE ---
+app.get('/', (req, res) => {
+  res.status(200).send(`
+    <div style="background: #0f172a; color: #fff; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: sans-serif;">
+      <h1 style="color: #3b82f6; margin-bottom: 8px;">🛡️ Secure Assessment Core API Active</h1>
+      <p style="color: #94a3b8; font-size: 1.1rem;">Cluster status: <strong style="color: #10b981;">Online</strong></p>
+    </div>
+  `);
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Production-ready server executing on port ${PORT}`));
