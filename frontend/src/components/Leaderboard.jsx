@@ -2,9 +2,29 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 export default function Leaderboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passphrase, setPassphrase] = useState('');
   const [standings, setStandings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Auto-check secure tab session memory layout on mount
+  useEffect(() => {
+    const sessionToken = sessionStorage.getItem('secure_result_session');
+    if (sessionToken === 'verified_result_token_99') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (passphrase === 'ResultIT@2026') {
+      sessionStorage.setItem('secure_result_session', 'verified_result_token_99');
+      setIsAuthenticated(true);
+    } else {
+      alert('INVALID SECURITY PASSPHRASE FOR RESULT ACCESS.');
+    }
+  };
 
   const fetchLeaderboardData = () => {
     setLoading(true);
@@ -29,10 +49,38 @@ export default function Leaderboard() {
     });
   };
 
+  // Trigger data synchronization hook only after successful authentication passport validation
   useEffect(() => {
-    fetchLeaderboardData();
-  }, []);
+    if (isAuthenticated) {
+      fetchLeaderboardData();
+    }
+  }, [isAuthenticated]);
 
+  // --- VIEW A: SECURITY ACCESSIBILITY WALL ---
+  if (!isAuthenticated) {
+    return (
+      <div className="card" style={{ maxWidth: '400px', margin: '80px auto', padding: '30px', textAlign: 'center', background: '#1e293b', borderRadius: '12px' }}>
+        <h3 style={{ color: '#fff', marginBottom: '8px' }}>Analytics Board Access</h3>
+        <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '16px' }}>Authentication passport required to query public metrics matrices.</p>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <input 
+            type="password" 
+            className="quiz-vertical-box" 
+            placeholder="Enter Result Access Passphrase"
+            value={passphrase}
+            onChange={e => setPassphrase(e.target.value)}
+            required
+            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #334155', background: '#0f172a', color: '#fff' }}
+          />
+          <button type="submit" className="primary-action-button" style={{ padding: '10px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+            Unlock Standings Board
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  // --- VIEW B: SECURE DYNAMIC ANALYTICS GRID ---
   return (
     <div className="card" style={{ maxWidth: '1000px', margin: '20px auto', padding: '25px', background: '#1e293b', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '16px', marginBottom: '24px' }}>
@@ -51,7 +99,7 @@ export default function Leaderboard() {
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>
-          <p style={{ fontSize: '1.1rem', animate: 'pulse 2s infinite' }}>Syncing academic standings matrix...</p>
+          <p style={{ fontSize: '1.1rem' }}>Syncing academic standings matrix...</p>
         </div>
       ) : error ? (
         <div style={{ textAlign: 'center', padding: '30px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '8px', color: '#ef4444' }}>
