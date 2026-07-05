@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'react';
+import axios from 'axios'; // Realignment to the correct library distribution
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
