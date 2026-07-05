@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Gradient Background Definition -->
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Tech Hexagon Rim -->
+  <polygon points="64,8 114,34 114,94 64,120 14,94 14,34" fill="#0f172a" stroke="#334155" stroke-width="4"/>
+  
+  <!-- Subtle Inner Tech Glow -->
+  <polygon points="64,14 108,37 108,91 64,114 20,91 20,37" fill="url(#glowGrad)" opacity="0.1"/>
+
+  <!-- Academic Integrity Shield -->
+  <path d="M64,22 C84,22 96,28 96,28 C96,28 96,65 96,76 C96,94 76,106 64,110 C52,106 32,94 32,76 C32,65 32,28 32,28 C32,28 44,22 64,22 Z" fill="url(#shieldGrad)"/>
+
+  <!-- Core Security Check / Node Symbol -->
+  <path d="M56,78 L42,64 L48,58 L56,66 L78,44 L84,50 Z" fill="#ffffff"/>
+  
+  <!-- Core Assessment Document Overlay Lines -->
+  <line x1="48" y1="38" x2="80" y2="38" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+</svg>
