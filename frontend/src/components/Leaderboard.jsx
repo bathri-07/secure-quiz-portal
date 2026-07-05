@@ -6,21 +6,29 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchLeaderboardData = () => {
-    setLoading(true);
-    setError(null);
-    // Append timestamp cache-buster to prevent static browser memory preservation
-    axios.get(`http://localhost:5000/api/leaderboard?t=${new Date().getTime()}`)
-      .then(res => {
-        setStandings(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Leaderboard Sync Error: ", err);
-        setError("Failed to synchronize academic standing matrices.");
-        setLoading(false);
-      });
-  };
+const fetchLeaderboardData = () => {
+  setLoading(true);
+  setError(null);
+  
+  // 🔥 DYNAMIC BINDING: Safely uses the live environment url variable instead of localhost
+  const BASE_URL = import.meta.env.VITE_API_URL || 'https://secure-quiz-backend-mkfv.onrender.com/api';
+  
+  axios.get(`${BASE_URL}/leaderboard?t=${new Date().getTime()}`, {
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache'
+    }
+  })
+    .then(res => {
+      setStandings(res.data);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error("Leaderboard Sync Error: ", err);
+      setError("Failed to synchronize academic standing matrices.");
+      setLoading(false);
+    });
+};
 
   useEffect(() => {
     fetchLeaderboardData();
