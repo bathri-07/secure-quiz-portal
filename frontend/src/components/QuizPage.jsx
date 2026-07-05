@@ -16,6 +16,9 @@ export default function QuizPage() {
   const finishedRef = useRef(false);
   const initializedListeners = useRef(false);
 
+  // 🔥 DYNAMIC BINDING: Points to your live production Render API
+  const BASE_URL = import.meta.env.VITE_API_URL || 'https://secure-quiz-backend-mkfv.onrender.com/api';
+
   const enterFullscreen = () => {
     if (finishedRef.current || document.fullscreenElement) return;
     const elem = document.documentElement;
@@ -41,17 +44,15 @@ export default function QuizPage() {
     }
   };
 
-  // 🔥 FIXED DYNAMIC RESET: Flushes stale views completely before drawing updated datasets
   useEffect(() => {
     if (isRegistered) {
       setLoading(true);
-      
-      // Explicitly wipe memory vectors instantly to prevent stale UI compounding
       setQuestions([]);
       setAnswers({});
       setElapsedTime(0);
       
-      axios.get(`http://localhost:5000/api/questions/${user.round}`, {
+      // ✅ FIXED: Now fetching from BASE_URL instead of localhost
+      axios.get(`${BASE_URL}/questions/${user.round}`, {
         params: {
           timestamp: new Date().getTime() 
         },
@@ -66,7 +67,6 @@ export default function QuizPage() {
           setQuestions([]);
           setTimeLeft(1200);
         } else {
-          // Direct array replacement cleanly overrides previous iterations
           setQuestions(res.data);
           const cloudConfiguredTime = res.data[0].roundDurationSeconds;
           setTimeLeft(Number(cloudConfiguredTime) || 1200); 
@@ -188,7 +188,8 @@ export default function QuizPage() {
     const secStr = currentElapsed % 60;
     const timeTakenStr = `${minStr}:${secStr < 10 ? '0' : ''}${secStr}`;
 
-    axios.post('http://localhost:5000/api/submit', {
+    // ✅ FIXED: Now submitting answers to BASE_URL instead of localhost
+    axios.post(`${BASE_URL}/submit`, {
       name: user.name,
       email: user.email,
       round: user.round,
@@ -205,7 +206,7 @@ export default function QuizPage() {
       setElapsedTime(0);
       setViolations(0);
       setSecurityMessage(null);
-      setQuestions([]); // Flush out collection profiles on reset
+      setQuestions([]); 
     })
     .catch(err => {
       console.error(err);
