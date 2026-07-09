@@ -50,7 +50,7 @@ export default function Home({ setView }) {
           textTransform: 'uppercase',
           border: '1px solid rgba(59, 130, 246, 0.3)'
         }}>
-          SECURE ASSESSMENT CORE v1.0
+          INFORMATION TECHNOLOGY
         </span>
         <h1 style={{ fontSize: '2.5rem', marginTop: '16px', marginBottom: '12px', background: 'linear-gradient(90deg, #fff 0%, #94a3b8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           Department Technical Examination Portal
