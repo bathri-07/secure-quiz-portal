@@ -53,7 +53,7 @@ export default function Home({ setView }) {
           INFORMATION TECHNOLOGY
         </span>
         <h1 style={{ fontSize: '2.5rem', marginTop: '16px', marginBottom: '12px', background: 'linear-gradient(90deg, #fff 0%, #94a3b8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          Department Technical Examination Portal
+          Information Technology Department Technical Quiz Portal
         </h1>
         <p style={{ color: '#94a3b8', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
           Secure, real-time assessment architecture engineered for advanced academic evaluations.
